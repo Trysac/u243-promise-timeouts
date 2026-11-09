@@ -4,20 +4,15 @@
 
 | Tool | Purpose | Why |
 |---|---|---|
-| TypeScript (strict) | Language and type checking | Typed public API and declarations for consumers. |
-| Node.js 20+ | Runtime | Maintained LTS lines with native ES modules. |
-| Vitest + `@vitest/coverage-v8` | Tests and coverage | Fast, ESM-native, runs TypeScript without a build step. |
-| Biome | Lint and format | One fast tool for both, single config file. |
-| gitleaks | Secret scanning | Standard scanner; runs locally and in CI. |
-| GitHub Actions + Dependabot | CI wrapper and updates | Runs the same local gates on Linux and Windows. |
+| TypeScript | Language and type checking | Typed public API with declarations; source uses `.js` import specifiers for ESM output. |
+| Node.js 20+ | Runtime | Target runtime for the ESM package. |
+| Vitest | Tests | Test suites in `test/` import Vitest and run against `src/index.ts`. |
+| `ManualTimers` | Test clock | The library's own virtual timer implementation; tests use it instead of real timers. |
 
 ## Discarded
 
 | Tool | Why not |
 |---|---|
-| ESLint + Prettier | Two tools and several configs where Biome covers both. |
-| Jest | Needs extra transforms for ESM and TypeScript; slower. |
-| Shell scripts for gates | Not portable to Windows; the gate runner is a Node script. |
-| Bundlers (tsup, Rollup) | Unneeded for a small ESM library; `tsc` emits what is published. |
-
-Add a row whenever a dependency or tool is added or rejected.
+| Runtime dependencies | The specification allows none (`allowed_dependencies: []`). |
+| Real timers in tests | The test suites use `ManualTimers` for deterministic time control. |
+| Retries, process-level deadlines, Node-only APIs | Out of scope for this utility. |

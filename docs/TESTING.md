@@ -2,36 +2,34 @@
 
 ## Tools
 
-- [Vitest](https://vitest.dev/) runs the suites in `test/`.
-- Coverage is collected with V8 (`@vitest/coverage-v8`) over `src/`.
+The tests use Vitest. They import the public API from `../src/index.js` and drive time with `ManualTimers`; no test uses real timers.
 
 ## Commands
 
 ```sh
-npm test            # vitest run --coverage
-npx vitest          # watch mode while developing
-npm run check       # every gate, including tests
+npx vitest          # run the test files in test/
+npx vitest --run    # single run
 ```
+
+## Suites
+
+- `test/index.test.ts` checks the public exports, `TimeoutsError` fields, and that `sleep`, `withTimeout`, and `raceAbort` work with `ManualTimers`.
+- `test/manual-timers.test.ts` covers clock start/advance, deadline ordering with registration-order ties, callbacks scheduled during `advance`, `pending`, `clearTimeout` with unknown handles, invalid `ms` in `advance` and `setTimeout`, and error propagation from callbacks.
+- `test/race-abort.test.ts` covers promise resolution/rejection before abort, abort before settle, and an already aborted signal.
+- `test/sleep.test.ts` covers exact-ms resolution, abort clearing the timer, already aborted signal, and invalid `ms`.
+- `test/with-timeout.test.ts` covers timeout timing, task resolution/rejection with timer cleanup, outer abort, already aborted outer signal without calling the task, invalid `ms`, `0 ms`, custom and truncated messages, synchronous task throws, task winning when settled before timer fires, ignoring task results after timeout, and nested `withTimeout` with an inner deadline longer than the outer.
 
 ## Rules
 
-- Coverage must stay at or above 80 % for lines, branches, functions and statements (`vitest.config.ts`).
-  Lowering the thresholds is not allowed.
-- Test through the public entry point (`src/index.ts`) and assert observable behavior: return values,
-  thrown errors and their messages.
-- Each bug fix adds a test that fails without the fix.
-- Tests are deterministic: no network, no real clock or randomness without injection, no shared state between
-  tests. Temporary files go to the OS temp directory and are removed by the test.
+- Tests exercise the public entry point (`src/index.ts` via `../src/index.js`).
+- Time is controlled with `ManualTimers`; `withTimeout` and `sleep` receive the `timers` option.
+- Assertions cover observable outcomes: resolved values, rejected `TimeoutsError` codes/messages, timer cleanup via `pending()`, and task signal state.
+- Each suite is deterministic and uses no network, real clock, or randomness.
 
 ## Tiers
 
-- Local tier (every gate run, coverage measured here): unit and property tests, plus conformance on small
-  fixtures kept in the repository.
-- CI tier: conformance that needs an external tool or a download. Name them `test/<name>.conformance.test.ts`; `vitest.config.ts` excludes them locally
-  (unless `FABRICA_CI=1`). The CI `conformance` job sets `FABRICA_CI=1` and runs the full suite. Tools are installed
-  by the optional `ci/conformance-setup.sh` (bash, CI only; verify every download against a pinned SHA-256), and
-  tagged tests skip cleanly when their tool is missing.
+All current tests are local unit tests in `test/`. There are no conformance or external-tool tests in the repository.
 
 ## Reports
 
-Coverage reports are written to `coverage/` (text summary and `lcov`). The folder is ignored by git.
+Vitest reports results to the console. The test files do not define additional report files.
