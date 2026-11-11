@@ -1,17 +1,16 @@
 # @trysac/promise-timeouts
 
-> Timeouts and cancellation for promises built on AbortSignal, with injectable timers, a cancellable sleep and a manual clock for tests TypeScript library for Node.js 20+, published as ES modules with type declarations. MIT.
+> Promise timeouts and cancellation utilities built on `AbortSignal`, with injectable timers, a cancellable `sleep`, `raceAbort`, and a manual clock for deterministic tests. ESM TypeScript library for Node.js 20+ with no runtime dependencies.
 
 ## Docs
 
-- [README](README.md): problem, installation and usage example
-- [AGENTS.md](AGENTS.md): commands, folder map, conventions and limits for contributors and agents
+- [README](README.md): problem, installation, usage and public API
+- [Project record](docs/PROJECT.md): objective, scope, timeline and effort metrics
+- [Security](docs/SECURITY.md): threat model, defended and not defended limits
+- [Testing](docs/TESTING.md): Vitest suites in `test/` and what they cover
 - [Architecture](docs/ARCHITECTURE.md): modules and boundaries
-- [Testing](docs/TESTING.md): how tests and coverage work
-- [Decisions](docs/decisions/0001-record-architecture-decisions.md): architecture decision records
+- [Stack](docs/STACK.md): used and discarded tools
 
 ## Optional
 
-- [Stack](docs/STACK.md): tools used and discarded
-- [Project record](docs/PROJECT.md): objective, scope, timeline and effort metrics
-- [Changelog](CHANGELOG.md)
+- [README API section](README.md#api): `withTimeout`, `sleep`, `raceAbort`, `ManualTimers`, `Timers`, `TimeoutsError`

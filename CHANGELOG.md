@@ -9,4 +9,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added promise timeout utilities with injectable timers, cancellable sleep, raceAbort, and a manual clock for deterministic tests.
 - Initial project structure from the factory utility template.

@@ -1,31 +1,39 @@
 # Security practices
 
-How this repository keeps the package and its users safe. The disclosure policy is in
-[../SECURITY.md](../SECURITY.md).
+Threat model and limits for `@trysac/promise-timeouts`. The code is a small ESM library with no runtime dependencies.
+
+## Threat model
+
+Defended:
+
+- Invalid `ms` values are rejected before a timer is created: `withTimeout` and `sleep` require an integer in `0..2_147_483_647`; `ManualTimers.setTimeout` and `ManualTimers.advance` require a non-negative integer. Rejections use `TimeoutsError` with `code: 'invalid_ms'`.
+- Timer handles and abort listeners are removed on the first settled outcome in `withTimeout`; `sleep` clears its timer on resolve and abort.
+- `withTimeout` composes with an outer `AbortSignal`; an already aborted outer signal rejects with `code: 'aborted'` without calling the task.
+- `raceAbort` attaches a rejection handler to the original promise after abort so an aborted race does not produce an unhandled rejection from that promise.
+- Custom timeout messages are truncated to 200 characters.
+- `ManualTimers.clearTimeout` ignores non-numeric and unknown handles.
+- The implementation uses no `eval`, dynamic `Function` construction, shell commands, network access, or file I/O.
+
+Not defended:
+
+- `withTimeout` cannot stop a task that ignores its `AbortSignal`. The returned promise rejects on timeout or outer abort, but the task may continue running and producing side effects.
+- `raceAbort` cannot cancel the original promise; it stops observing it and suppresses unhandled rejection after abort.
+- There is no sandbox for malicious task code or custom `Timers` implementations.
+- There are no retries, process-level deadlines, or Node-only cancellation mechanisms.
+- The library does not manage secrets or credentials because it performs no I/O and reads no environment variables.
 
 ## Secrets
 
-- No secrets, tokens or credentials in the repository, commit history, logs or prompts.
-- `gitleaks` runs as the last step of `npm run check` and as a dedicated CI job. Its configuration is
-  `.gitleaks.toml`.
-- Publishing credentials live only in the CI secret store or the maintainer's local npm configuration.
+The library source contains no secrets, tokens, or credentials, and it reads no environment variables.
 
 ## Dependencies
 
-- Runtime dependencies are avoided; development dependencies are limited to the toolchain listed in
-  [STACK.md](STACK.md).
-- Dependabot opens weekly updates for npm packages and GitHub Actions.
-- Commit the generated `package-lock.json` so installs are reproducible.
+The specification allows no runtime dependencies. Tests use Vitest; the library itself does not.
 
 ## Code
 
-- No `eval`, dynamic `Function` construction or shelling out from library code.
-- Inputs from callers are validated and rejected with explicit errors.
-- The `security` step of `npm run check` runs ESLint with eslint-plugin-security only (Biome stays the
-  linter). Its configuration is `scripts/eslint-security.config.mjs`; inline `eslint-disable` comments are
-  ignored, so a finding is fixed in the code, never silenced.
+Inputs are validated as described in the threat model. Errors are raised as `TimeoutsError` where the public API documents `timeout`, `aborted`, or `invalid_ms`; a task's own synchronous throw or rejection is passed through unchanged. `ManualTimers.advance` runs all due callbacks, moves the clock to the target time, and rethrows the first callback error.
 
 ## Publishing
 
-- Packages are published from a clean checkout after `npm run check` passes.
-- Only `dist/` is included in the published tarball.
+The package is public OSS, ESM, and published as `@trysac/promise-timeouts` for Node.js 20+. The source has no runtime dependencies.
