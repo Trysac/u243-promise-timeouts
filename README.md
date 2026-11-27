@@ -4,9 +4,15 @@ Promise timeouts and cancellation utilities built on `AbortSignal`, with injecta
 
 ## Installation
 
+Not published to npm yet. Build it from a clone, then install it from the local path:
+
 ```sh
-npm install @trysac/promise-timeouts
+git clone https://github.com/Trysac/u243-promise-timeouts.git
+cd u243-promise-timeouts && npm ci && npm run build
+cd ../your-project && npm install ../u243-promise-timeouts
 ```
+
+Imports keep the package name: `import { ... } from "@trysac/promise-timeouts"`.
 
 ## Usage
 
